@@ -4,30 +4,45 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Adapi.Models;
+using Adapi.Domain;
+using MongoDB.Driver;
+using Microsoft.AspNetCore.Http;
 
 namespace Adapi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class SalesController : ControllerBase
     {
         private readonly ILogger<SalesController> _logger;
 
-        public SalesController(ILogger<SalesController> logger)
+        private SalesService _salesService;
+
+        public SalesController(ILogger<SalesController> logger, IMongoClient mongoClient)
         {
             _logger = logger;
+
+            _salesService = new SalesService(mongoClient);
         }
 
-        [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IActionResult Post(string articleNumber, decimal salesPrice)
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            try
+            { 
+                _salesService.Insert(articleNumber, salesPrice);
+            }
+            catch(FormatException formatEx)
             {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-            })
-            .ToArray();
+                return BadRequest(formatEx.Message);
+            }
+            
+
+            return Ok();
         }
     }
 }
