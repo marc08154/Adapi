@@ -24,6 +24,7 @@ namespace Adapi.Models
         public decimal SalesPrice { get; set; }
 
         [BsonRepresentation(BsonType.DateTime)]
+        [BsonDateTimeOptions(DateOnly = true)]
         public DateTime SaleDate { get; }
     }
 }

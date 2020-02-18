@@ -1,6 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using Adapi.Domain;
+using Adapi.Models;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Adapi.Controllers
 {
@@ -9,29 +14,40 @@ namespace Adapi.Controllers
     public class ReportsController : ControllerBase
     {
         private readonly IMongoClient _mongoClient;
+        private readonly SalesStatisticsRepository _salesStatisticsRepository;
 
         public ReportsController(IMongoClient mongoClient)
         {
             _mongoClient = mongoClient;
+
+            _salesStatisticsRepository = new SalesStatisticsRepository(mongoClient);
         }
 
         // Number of sold articles per day
-        [HttpGet]
-        public IEnumerable<string> Get()
+        [HttpGet("date/sales")]
+        public IEnumerable<DailySalesStatistic> DailySales(DateTime date)
         {
-            return null;
+            if (date != DateTime.MinValue)
+                return _salesStatisticsRepository.GetDailySalesStatistics(date).ToList();
+            else return _salesStatisticsRepository.GetDailySalesStatistics();
         }
 
         // Total revenue per day
-
-        // Statistics: Revenue grouped by articles
-
-
-        // GET: api/Reports/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        [HttpGet("date/revenue")]
+        public IEnumerable<DailyRevenueStatistic> DailyRevenue(DateTime date)
         {
-            return "value";
+            if (date != DateTime.MinValue)
+                return _salesStatisticsRepository.GetDailyRevenueStatistics(date).ToList();
+            else return _salesStatisticsRepository.GetDailyRevenueStatistics().ToList();
+        }
+
+        // Statistics: Revenue per article
+        [HttpGet("article/revenue")]
+        public IEnumerable<RevenueByArticleStatistic> DailyRevenue(string articleNumber)
+        {
+            if (Regex.IsMatch(articleNumber, "^([A-Za-z0-9]){1,32}$"))
+                return _salesStatisticsRepository.GetRevenueByArticleStatistics(articleNumber).ToList();
+            else return _salesStatisticsRepository.GetRevenueByArticleStatistics().ToList();
         }
 
         
