@@ -11,7 +11,7 @@ namespace Adapi.Models
     {
         public DailyRevenueStatistic(DateTime date, decimal revenue)
         {
-            SaleDate = date;
+            Date = date;
             Revenue = revenue;
         }
 
@@ -21,7 +21,7 @@ namespace Adapi.Models
 
         [BsonRepresentation(BsonType.DateTime)]
         [BsonDateTimeOptions(DateOnly = true)]
-        public DateTime SaleDate { get; }
+        public DateTime Date { get; set; }
 
         [BsonRepresentation(BsonType.Decimal128)]
         public decimal Revenue { get; set; }       

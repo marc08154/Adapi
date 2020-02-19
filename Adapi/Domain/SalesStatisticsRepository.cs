@@ -52,7 +52,7 @@ namespace Adapi.Domain
         #region Daily Revenue Statistics
         public IEnumerable<DailyRevenueStatistic> GetDailyRevenueStatistics(DateTime date)
         {
-            return GetRevenueStatistic(Builders<DailyRevenueStatistic>.Filter.Eq(stat => stat.SaleDate, date));
+            return GetRevenueStatistic(Builders<DailyRevenueStatistic>.Filter.Eq(stat => stat.Date, date));
         }
 
         public IEnumerable<DailyRevenueStatistic> GetDailyRevenueStatistics()
@@ -70,7 +70,7 @@ namespace Adapi.Domain
 
         public void UpsertDailyRevenueStatistics(DateTime date, decimal revenueChange)
         {
-            var filter = Builders<DailyRevenueStatistic>.Filter.Eq(stat => stat.SaleDate, date);
+            var filter = Builders<DailyRevenueStatistic>.Filter.Eq(stat => stat.Date, date);
             var update = Builders<DailyRevenueStatistic>.Update.Inc(stat => stat.Revenue, revenueChange);
             var updateOptions = new UpdateOptions { IsUpsert = true };
 

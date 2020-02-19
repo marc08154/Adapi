@@ -25,6 +25,6 @@ namespace Adapi.Models
 
         [BsonRepresentation(BsonType.DateTime)]
         [BsonDateTimeOptions(DateOnly = true)]
-        public DateTime SaleDate { get; }
+        public DateTime SaleDate { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace Adapi.Models
 
         [BsonRepresentation(BsonType.DateTime)]
         [BsonDateTimeOptions(DateOnly = true)]
-        public DateTime Date { get; }
+        public DateTime Date { get; set; }
 
         public int NumberOfSales { get; set; }       
     }

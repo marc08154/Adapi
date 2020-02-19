@@ -13,17 +13,17 @@ namespace Adapi.Controllers
     [ApiController]
     public class ReportsController : ControllerBase
     {
-        private readonly IMongoClient _mongoClient;
         private readonly SalesStatisticsRepository _salesStatisticsRepository;
 
         public ReportsController(IMongoClient mongoClient)
         {
-            _mongoClient = mongoClient;
-
             _salesStatisticsRepository = new SalesStatisticsRepository(mongoClient);
         }
 
-        // Number of sold articles per day
+        /// <summary>
+        /// Returns the number of sales for all articles on a given date
+        /// </summary>
+        /// <param name="date">Desired date for statistics report in the format yyyy-MM-dd. If omitted, all available entries are returned</param>
         [HttpGet("date/sales")]
         public IEnumerable<DailySalesStatistic> DailySales(DateTime date)
         {
@@ -32,7 +32,10 @@ namespace Adapi.Controllers
             else return _salesStatisticsRepository.GetDailySalesStatistics();
         }
 
-        // Total revenue per day
+        /// <summary>
+        /// Returns the total revenue for all products on the given date
+        /// </summary>
+        /// <param name="date">Desired date for statistics report in the format yyyy-MM-dd. If omitted, all available entries are returned</param>
         [HttpGet("date/revenue")]
         public IEnumerable<DailyRevenueStatistic> DailyRevenue(DateTime date)
         {
@@ -41,11 +44,14 @@ namespace Adapi.Controllers
             else return _salesStatisticsRepository.GetDailyRevenueStatistics().ToList();
         }
 
-        // Statistics: Revenue per article
+        /// <summary>
+        /// Returns the total revenue by product from all sales
+        /// </summary>
+        /// <param name="articleNumber">Alphanumeric article number with a length in the range of 1 to 32. If omitted, all available entries are returned</param>
         [HttpGet("article/revenue")]
         public IEnumerable<RevenueByArticleStatistic> DailyRevenue(string articleNumber)
         {
-            if (Regex.IsMatch(articleNumber, "^([A-Za-z0-9]){1,32}$"))
+            if (!string.IsNullOrWhiteSpace(articleNumber) && Regex.IsMatch(articleNumber, "^([A-Za-z0-9]){1,32}$"))
                 return _salesStatisticsRepository.GetRevenueByArticleStatistics(articleNumber).ToList();
             else return _salesStatisticsRepository.GetRevenueByArticleStatistics().ToList();
         }

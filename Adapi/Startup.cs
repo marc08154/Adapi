@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+using System;
+using System.IO;
 
 namespace Adapi
 {
@@ -25,6 +27,10 @@ namespace Adapi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Avery Dennison API", Version = "v1" });
+
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, "AdapiSwagger.xml");
+
+                c.IncludeXmlComments(xmlPath);
             });
 
             services.AddSingleton<IMongoClient>(x => new MongoClient("mongodb+srv://adapiUser:adapi@adapicluster-la0yw.azure.mongodb.net/test?retryWrites=true&w=majority"));

@@ -3,7 +3,6 @@ using Adapi.Models;
 
 namespace Adapi.Domain
 {
-    // TODO: Interface for mocking in Unit Tests
     public class SalesRepository
     {
         private readonly IMongoClient _mongoClient;
@@ -18,9 +17,9 @@ namespace Adapi.Domain
             _salesCollection = database.GetCollection<Sale>("Sales");
         }
 
-        public async void Insert(Sale sale)
+        public void Insert(Sale sale)
         {
-            await _salesCollection.InsertOneAsync(sale);
+            _salesCollection.InsertOne(sale);
         }
 
     }
