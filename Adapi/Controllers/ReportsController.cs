@@ -55,7 +55,5 @@ namespace Adapi.Controllers
                 return _salesStatisticsRepository.GetRevenueByArticleStatistics(articleNumber).ToList();
             else return _salesStatisticsRepository.GetRevenueByArticleStatistics().ToList();
         }
-
-        
     }
 }

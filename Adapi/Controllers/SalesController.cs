@@ -11,14 +11,10 @@ namespace Adapi.Controllers
     [Route("api/[controller]")]
     public class SalesController : ControllerBase
     {
-        private readonly ILogger<SalesController> _logger;
-
         private SalesService _salesService;
 
-        public SalesController(ILogger<SalesController> logger, IMongoClient mongoClient)
+        public SalesController(IMongoClient mongoClient)
         {
-            _logger = logger;
-
             _salesService = new SalesService(mongoClient);
         }
 
@@ -45,7 +41,6 @@ namespace Adapi.Controllers
                 return BadRequest(formatEx.Message);
             }
             
-
             return Ok();
         }
     }
