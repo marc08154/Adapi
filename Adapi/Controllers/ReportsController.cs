@@ -64,8 +64,8 @@ namespace Adapi.Controllers
         /// The maximum number of elements returned at once is 1000.
         /// </summary>
         /// <param name="articleNumber">Alphanumeric article number with a length in the range of 1 to 32</param>
-        /// <param name="page">Page number containing "pageSize" elements to be returned. If <1 or omitted, will be set to 1</param>
-        /// <param name="pageSize">Number of elements per page. If >1000 or omitted, 1000 will be used instead</param>
+        /// <param name="page">Number of page containing "pageSize" elements to be returned. If smaller than 1 or omitted, will be set to 1</param>
+        /// <param name="pageSize">Number of elements per page. If larger than 1000 or omitted, 1000 will be used instead</param>
         [HttpGet("articles/revenue")]
         public IActionResult TotalArticleRevenue(string articleNumber, int page, int pageSize)
         {
