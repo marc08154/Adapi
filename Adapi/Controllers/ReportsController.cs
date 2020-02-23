@@ -25,11 +25,19 @@ namespace Adapi.Controllers
         /// </summary>
         /// <param name="date">Desired date for statistics report in the format yyyy-MM-dd. If omitted, all available entries are returned</param>
         [HttpGet("date/sales")]
-        public IEnumerable<DailySalesStatistic> DailySales(DateTime date)
+        public IActionResult DailySales(DateTime date)
         {
-            if (date != DateTime.MinValue)
-                return _salesStatisticsRepository.GetDailySalesStatistics(date).ToList();
-            else return _salesStatisticsRepository.GetDailySalesStatistics();
+            try
+            {
+                if (date != DateTime.MinValue)
+                    return Ok(_salesStatisticsRepository.GetDailySalesStatistics(date).ToList());
+                else return Ok(_salesStatisticsRepository.GetDailySalesStatistics());
+            }           
+
+            catch (TimeoutException timeoutEx)
+            {
+                return StatusCode(408, "Could not connect to database");
+            }
         }
 
         /// <summary>
@@ -37,25 +45,51 @@ namespace Adapi.Controllers
         /// </summary>
         /// <param name="date">Desired date for statistics report in the format yyyy-MM-dd. If omitted, all available entries are returned</param>
         [HttpGet("date/revenue")]
-        public IEnumerable<DailyRevenueStatistic> DailyRevenue(DateTime date)
+        public IActionResult DailyRevenue(DateTime date)
         {
-            if (date != DateTime.MinValue)
-                return _salesStatisticsRepository.GetDailyRevenueStatistics(date).ToList();
-            else return _salesStatisticsRepository.GetDailyRevenueStatistics().ToList();
+            try
+            {
+                if (date != DateTime.MinValue)
+                    return Ok(_salesStatisticsRepository.GetDailyRevenueStatistics(date).ToList());
+                else return Ok(_salesStatisticsRepository.GetDailyRevenueStatistics().ToList());
+            }
+            catch (TimeoutException timeoutEx)
+            {
+                return StatusCode(408, "Could not connect to database");
+            }
         }
 
         /// <summary>
-        /// Returns the total revenue by product from all sales
+        /// Returns the total revenue by product from all sales, sorted ascendingly by article number.
+        /// The maximum number of elements returned at once is 1000.
         /// </summary>
-        /// <param name="articleNumber">Alphanumeric article number with a length in the range of 1 to 32. If omitted, all available entries are returned</param>
-        [HttpGet("article/revenue")]
-        public IEnumerable<RevenueByArticleStatistic> DailyRevenue(string articleNumber)
+        /// <param name="articleNumber">Alphanumeric article number with a length in the range of 1 to 32</param>
+        /// <param name="page">Page number containing "pageSize" elements to be returned. If <1 or omitted, will be set to 1</param>
+        /// <param name="pageSize">Number of elements per page. If >1000 or omitted, 1000 will be used instead</param>
+        [HttpGet("articles/revenue")]
+        public IActionResult TotalArticleRevenue(string articleNumber, int page, int pageSize)
         {
-            if (!string.IsNullOrWhiteSpace(articleNumber) && Regex.IsMatch(articleNumber, "^([A-Za-z0-9]){1,32}$"))
-                return _salesStatisticsRepository.GetRevenueByArticleStatistics(articleNumber).ToList();
-            else return _salesStatisticsRepository.GetRevenueByArticleStatistics().ToList();
-        }
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(articleNumber) && Regex.IsMatch(articleNumber, "^([A-Za-z0-9]){1,32}$"))
+                    return Ok(_salesStatisticsRepository.GetRevenueByArticleStatistics(articleNumber).ToList());
+                else
+                {
+                    if (pageSize > 1000) pageSize = 1000;
 
-        
+                    if (page < 1) page = 1;
+
+                    var skip = (page - 1) * pageSize;
+
+                    return Ok(_salesStatisticsRepository.GetRevenueByArticleStatistics(skip, pageSize).ToList());
+                }
+
+                return BadRequest("Please either provide an article number or use pagination! Returning all entries without filtering is not supported!");
+            }
+            catch (TimeoutException timeoutEx)
+            {
+                return StatusCode(408, "Could not connect to database");
+            }
+        }
     }
 }

@@ -83,20 +83,24 @@ namespace Adapi.Domain
         #region Article Revenue Statistics
         public IEnumerable<RevenueByArticleStatistic> GetRevenueByArticleStatistics(string articleNumber)
         {
-            return GetRevenueStatistic(Builders<RevenueByArticleStatistic>.Filter.Eq(stat => stat.ArticleNumber, articleNumber));
+            return GetRevenueStatistic(Builders<RevenueByArticleStatistic>.Filter.Eq(stat => stat.ArticleNumber, articleNumber))
+                    .ToEnumerable();
         }
 
-        public IEnumerable<RevenueByArticleStatistic> GetRevenueByArticleStatistics()
+        public IEnumerable<RevenueByArticleStatistic> GetRevenueByArticleStatistics(int skip, int pageSize)
         {
-            return GetRevenueStatistic(Builders<RevenueByArticleStatistic>.Filter.Empty);
+            return GetRevenueStatistic(Builders<RevenueByArticleStatistic>.Filter.Empty)
+                    .Skip(skip)
+                    .Limit(pageSize)
+                    .ToEnumerable();
         }
 
-        private IEnumerable<RevenueByArticleStatistic> GetRevenueStatistic(FilterDefinition<RevenueByArticleStatistic> filter)
+        private IFindFluent<RevenueByArticleStatistic, RevenueByArticleStatistic> GetRevenueStatistic(FilterDefinition<RevenueByArticleStatistic> filter)
         {
             return _adapiDb
                     .GetCollection<RevenueByArticleStatistic>("RevenueByArticleStatistics")
                     .Find(filter)
-                    .ToEnumerable();
+                    .Sort(Builders<RevenueByArticleStatistic>.Sort.Ascending(x => x.ArticleNumber));
         }
 
         public void UpsertRevenueByArticleStatistics(string articleNumber, decimal revenueChange)
