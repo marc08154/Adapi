@@ -7,34 +7,37 @@ namespace Adapi.Domain
 {
     public class SalesStatisticsRepository
     {
-        private readonly IMongoClient _mongoClient;
-
         private readonly IMongoDatabase _adapiDb;
-        
-        public SalesStatisticsRepository(IMongoClient mongoClient)
-        {
-            _mongoClient = mongoClient;
 
-            _adapiDb = _mongoClient.GetDatabase("AdapiDB");
+        public SalesStatisticsRepository(IMongoClient mongoClient)
+        { 
+            _adapiDb = mongoClient.GetDatabase("AdapiDB");
+        }
+
+        private IFindFluent<T, T> GetStatistic<T>(string collectionName, FilterDefinition<T> filter)
+        {
+            return _adapiDb
+                .GetCollection<T>(collectionName)
+                .Find(filter);
         }
 
         #region Daily Sales Statistics
         public IEnumerable<DailySalesStatistic> GetDailySalesStatistics(DateTime date)
         {
-            return GetSalesStatistic(Builders<DailySalesStatistic>.Filter.Eq(stat => stat.Date, date));
+            return GetStatistic<DailySalesStatistic>(
+                    "DailySalesStatistics",
+                    Builders<DailySalesStatistic>.Filter.Eq(stat => stat.Date, date)
+                )   
+                .ToEnumerable();
         }
 
         public IEnumerable<DailySalesStatistic> GetDailySalesStatistics()
         {
-            return GetSalesStatistic(Builders<DailySalesStatistic>.Filter.Empty);
-        }
-
-        private IEnumerable<DailySalesStatistic> GetSalesStatistic(FilterDefinition<DailySalesStatistic> filter)
-        {
-            return _adapiDb
-                    .GetCollection<DailySalesStatistic>("DailySalesStatistics")
-                    .Find(filter)
-                    .ToEnumerable();
+            return GetStatistic<DailySalesStatistic>(
+                    "DailySalesStatistics",
+                    Builders<DailySalesStatistic>.Filter.Empty
+                )
+                .ToEnumerable();
         }
 
         public void UpsertDailySalesStatistics(DateTime date, int salesChange)
@@ -52,20 +55,20 @@ namespace Adapi.Domain
         #region Daily Revenue Statistics
         public IEnumerable<DailyRevenueStatistic> GetDailyRevenueStatistics(DateTime date)
         {
-            return GetRevenueStatistic(Builders<DailyRevenueStatistic>.Filter.Eq(stat => stat.Date, date));
+            return GetStatistic<DailyRevenueStatistic>(
+                    "DailyRevenueStatistics",
+                    Builders<DailyRevenueStatistic>.Filter.Eq(stat => stat.Date, date)
+                )
+                .ToEnumerable();
         }
 
         public IEnumerable<DailyRevenueStatistic> GetDailyRevenueStatistics()
         {
-            return GetRevenueStatistic(Builders<DailyRevenueStatistic>.Filter.Empty);
-        }
-
-        private IEnumerable<DailyRevenueStatistic> GetRevenueStatistic(FilterDefinition<DailyRevenueStatistic> filter)
-        {
-            return _adapiDb
-                    .GetCollection<DailyRevenueStatistic>("DailyRevenueStatistics")
-                    .Find(filter)
-                    .ToEnumerable();
+            return GetStatistic<DailyRevenueStatistic>(
+                    "DailyRevenueStatistics",
+                    Builders<DailyRevenueStatistic>.Filter.Empty
+                )
+                .ToEnumerable();
         }
 
         public void UpsertDailyRevenueStatistics(DateTime date, decimal revenueChange)
@@ -83,24 +86,23 @@ namespace Adapi.Domain
         #region Article Revenue Statistics
         public IEnumerable<RevenueByArticleStatistic> GetRevenueByArticleStatistics(string articleNumber)
         {
-            return GetRevenueStatistic(Builders<RevenueByArticleStatistic>.Filter.Eq(stat => stat.ArticleNumber, articleNumber))
-                    .ToEnumerable();
+            return GetStatistic<RevenueByArticleStatistic>(
+                    "RevenueByArticleStatistics",
+                    Builders<RevenueByArticleStatistic>.Filter.Eq(stat => stat.ArticleNumber, articleNumber)
+                )
+                .ToEnumerable();
         }
 
         public IEnumerable<RevenueByArticleStatistic> GetRevenueByArticleStatistics(int skip, int pageSize)
         {
-            return GetRevenueStatistic(Builders<RevenueByArticleStatistic>.Filter.Empty)
-                    .Skip(skip)
-                    .Limit(pageSize)
-                    .ToEnumerable();
-        }
-
-        private IFindFluent<RevenueByArticleStatistic, RevenueByArticleStatistic> GetRevenueStatistic(FilterDefinition<RevenueByArticleStatistic> filter)
-        {
-            return _adapiDb
-                    .GetCollection<RevenueByArticleStatistic>("RevenueByArticleStatistics")
-                    .Find(filter)
-                    .Sort(Builders<RevenueByArticleStatistic>.Sort.Ascending(x => x.ArticleNumber));
+            return GetStatistic<RevenueByArticleStatistic>(
+                    "RevenueByArticleStatistics",
+                    Builders<RevenueByArticleStatistic>.Filter.Empty
+                )
+                .Sort(Builders<RevenueByArticleStatistic>.Sort.Ascending(document => document.ArticleNumber))
+                .Skip(skip)
+                .Limit(pageSize)
+                .ToEnumerable();
         }
 
         public void UpsertRevenueByArticleStatistics(string articleNumber, decimal revenueChange)
@@ -114,7 +116,5 @@ namespace Adapi.Domain
                 .UpdateOne(filter, update, updateOptions);
         }
         #endregion
-
-
     }
 }
